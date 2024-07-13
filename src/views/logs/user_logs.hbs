@@ -1,0 +1,42 @@
+<div class="container mt-4">
+    <h2>Reporte de empleados</h2>
+    <form class="form-inline mb-3" method="GET" action="/logs/user_logs">
+        <select name="user" class="form-control mr-sm-2">
+            <option value="">Todos los Usuarios</option>
+            {{#each users}}
+            <option value="{{this.id}}" {{#ifEquals ../userFilter this.id}}selected{{/ifEquals}}>{{this.user}}</option>
+            {{/each}}
+        </select>
+        <input type="date" name="startDate" class="form-control mr-sm-2" value="{{startDate}}">
+        <input type="date" name="endDate" class="form-control mr-sm-2" value="{{endDate}}">
+        <button type="submit" class="btn btn-primary">Filtrar</button>
+    </form>
+    {{#if logs.length}}
+    <div class="table-responsive">
+        <table class="table table-bordered table-hover">
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Usuario</th>
+                    <th>Acción</th>
+                    <th>Descripción</th>
+                    <th>Fecha</th>
+                </tr>
+            </thead>
+            <tbody>
+                {{#each logs}}
+                <tr>
+                    <td>{{this.id}}</td>
+                    <td>{{this.user}}</td>
+                    <td>{{this.action}}</td>
+                    <td>{{this.description}}</td>
+                    <td>{{this.timestamp}}</td>
+                </tr>
+                {{/each}}
+            </tbody>
+        </table>
+    </div>
+    {{else}}
+    <p>No hay logs disponibles</p>
+    {{/if}}
+</div>

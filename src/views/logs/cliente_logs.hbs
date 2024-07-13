@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Reporte de Clientes</title>
+    <link rel="stylesheet" href="/stylesheets/style.css">
+</head>
+<body>
+    <div class="container mt-4">
+        <h2>Reporte de Clientes</h2>
+        <form class="form-inline mb-3" method="GET" action="/logs/cliente_logs">
+            <div class="form-group mr-3">
+                <label for="user" class="mr-2">Usuario</label>
+                <select class="form-control" id="user" name="user">
+                    <option value="">Todos los Usuarios</option>
+                    {{#each users}}
+                    <option value="{{this.id}}" {{#ifEquals ../userFilter this.id}}selected{{/ifEquals}}>{{this.user}}</option>
+                    {{/each}}
+                </select>
+            </div>
+            <div class="form-group mr-3">
+                <label for="startDate" class="mr-2">Desde</label>
+                <input type="date" class="form-control" id="startDate" name="startDate" value="{{startDate}}">
+            </div>
+            <div class="form-group mr-3">
+                <label for="endDate" class="mr-2">Hasta</label>
+                <input type="date" class="form-control" id="endDate" name="endDate" value="{{endDate}}">
+            </div>
+            <button type="submit" class="btn btn-primary">Filtrar</button>
+        </form>
+
+        <table class="table table-striped">
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Usuario</th>
+                    <th>Acción</th>
+                    <th>Descripción</th>
+                    <th>Fecha</th>
+                </tr>
+            </thead>
+            <tbody>
+                {{#each logs}}
+                <tr>
+                    <td>{{this.id}}</td>
+                    <td>{{this.user}}</td>
+                    <td>{{this.action}}</td>
+                    <td>{{this.description}}</td>
+                    <td>{{this.timestamp}}</td>
+                </tr>
+                {{else}}
+                <tr>
+                    <td colspan="5" class="text-center">No hay registros</td>
+                </tr>
+                {{/each}}
+            </tbody>
+        </table>
+    </div>
+</body>
+</html>

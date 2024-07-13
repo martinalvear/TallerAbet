@@ -1,0 +1,223 @@
+<style>
+    .truncate {
+        max-width: 150px;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
+
+    .mb-custom {
+        margin-bottom: 10px;
+    }
+
+    .table-hover tbody tr:hover {
+        background-color: #d6e4f0; /* Color de fondo al pasar el cursor */
+        cursor: pointer;
+    }
+
+    .table thead {
+        background-color: #007bff; /* Color de fondo de la cabecera */
+        color: #ffffff; /* Color del texto de la cabecera */
+    }
+
+    .table tbody tr {
+        background-color: #f0f8ff; /* Color de fondo de las filas */
+    }
+
+    .table tbody tr:nth-of-type(odd) {
+        background-color: #e6f2ff; /* Color de fondo de las filas impares */
+    }
+
+    .tooltip-inner {
+        max-width: 200px;
+        white-space: pre-wrap;
+    }
+
+    .btn-custom {
+        background-color: #6c757d;
+        color: #ffffff;
+        border: none;
+    }
+
+    .btn-custom:hover {
+        background-color: #5a6268;
+        color: #ffffff;
+    }
+
+    .btn-danger-custom {
+        background-color: #dc3545;
+        color: #ffffff;
+        border: none;
+    }
+
+    .btn-danger-custom:hover {
+        background-color: #c82333;
+        color: #ffffff;
+    }
+
+    .btn-success-custom {
+        background-color: #007bff; /* Azul */
+        color: #ffffff;
+        border: none;
+    }
+
+    .btn-success-custom:hover {
+        background-color: #0056b3; /* Azul oscuro */
+        color: #ffffff;
+    }
+
+    .search-form {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+
+    .search-form input,
+    .search-form select {
+        flex: 1;
+    }
+</style>
+
+<div class="container p-4">
+    <div class="row mb-custom">
+        <div class="col-12">
+            <h2>Empleados</h2>
+        </div>
+        
+        <div class="col-12 text-left mt-2">
+            {{#ifEquals user.idrol 1}}
+            <a href="/signup/empleado" class="btn btn-success-custom mb-3">Añadir</a>
+            {{/ifEquals}}
+            {{#ifEquals user.idrol 2}}
+            <a href="/signup/empleado" class="btn btn-success-custom mb-3">Añadir</a>
+            {{/ifEquals}}
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-12">
+            {{#if empleados.length}}
+            <div class="table-responsive">
+                <table class="table table-bordered table-hover">
+                    <thead>
+                        <tr>
+                            <th>Cédula</th>
+                            <th>Nombre</th>
+                            <th>Apellido</th>
+                            <th>Rol</th>
+                            <th>Empresa</th>
+                            <th>Sede</th>
+                            {{#ifEquals user.idrol 2}}
+                            <th>Acciones</th>
+                            {{/ifEquals}}
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {{#each empleados}}
+                        <tr data-toggle="modal" data-target="#employeeModal" data-id="{{id}}" data-toggle="tooltip" title="Click para ver más detalles">
+                            <td>{{cedula}}</td>
+                            <td>{{name}}</td>
+                            <td>{{surname}}</td>
+                            <td>{{rol}}</td>
+                            <td>{{empresa}}</td>
+                            <td>{{sede}}</td>
+                            {{#ifEquals ../user.idrol 2}}
+                            <td>
+                                <a href="/empleados/edit/{{id}}" class="">Editar</a>
+                                <a href="/empleados/delete/{{id}}" class="">Eliminar</a>
+                            </td>
+                            {{/ifEquals}}
+                            {{#ifEquals ../user.idrol 1}}
+                            <td>
+                                <a href="/empleados/edit/{{id}}" class="">Editar</a>
+                                <a href="/empleados/delete/{{id}}" class="">Eliminar</a>
+                            </td>
+                            {{/ifEquals}}
+                        </tr>
+                        {{/each}}
+                    </tbody>
+                </table>
+            </div>
+            {{else}}
+            <div class="card card-body text-center">
+                <p>No hay empleados guardados</p>
+                <a href="/signup/empleado" class="btn btn-success-custom">Crear nuevo</a>
+            </div>
+            {{/if}}
+        </div>
+    </div>
+</div>
+
+<!-- Modal -->
+<div class="modal fade" id="employeeModal" tabindex="-1" role="dialog" aria-labelledby="employeeModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="employeeModalLabel">Detalles del Empleado</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <!-- Aquí se cargarán los detalles del empleado -->
+                <div id="employee-details"></div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Cerrar</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Incluye los scripts de Bootstrap -->
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.10.2/dist/umd/popper.min.js"></script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/5.1.3/js/bootstrap.min.js"></script>
+
+<script>
+    $(document).ready(function() {
+        $('#employeeModal').on('show.bs.modal', async function (event) {
+            var button = $(event.relatedTarget);
+            var employeeId = button.data('id');
+            var modal = $(this);
+
+            const response = await fetch(`/empleados/${employeeId}`);
+            const employee = await response.json();
+
+            var detailsHtml = `
+                <p><strong>Cédula:</strong> ${employee.cedula}</p>
+                <p><strong>Nombre:</strong> ${employee.name}</p>
+                <p><strong>Apellido:</strong> ${employee.surname}</p>
+                <p><strong>ID:</strong> ${employee.id}</p>
+                <p><strong>Usuario:</strong> ${employee.user}</p>
+                <p><strong>Correo Electrónico:</strong> ${employee.email}</p>
+                <p><strong>Teléfono:</strong> ${employee.phone}</p>
+                <p><strong>Dirección:</strong> ${employee.address}</p>
+                <p><strong>Rol:</strong> ${employee.rol}</p>
+                <p><strong>Empresa:</strong> ${employee.empresa}</p>
+                <p><strong>Sede:</strong> ${employee.sede}</p>
+            `;
+            modal.find('#employee-details').html(detailsHtml);
+        });
+
+        $('#empresaFilter').change(async function() {
+            const empresaId = $(this).val();
+            const response = await fetch('/empleados/edit/sedes', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ idempresa: empresaId })
+            });
+            const sedes = await response.json();
+            const sedeSelect = $('#sedeFilter');
+            sedeSelect.empty();
+            sedeSelect.append('<option value="">Todas las Sedes</option>');
+            sedes.forEach(sede => {
+                sedeSelect.append(`<option value="${sede.code}">${sede.name}</option>`);
+            });
+        });
+
+        $('[data-toggle="tooltip"]').tooltip();
+    });
+</script>
+<script src="/scripts/main.js"></script>

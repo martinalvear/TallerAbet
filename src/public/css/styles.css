@@ -1,0 +1,11 @@
+/* Add any custom styles you need here */
+.form-group .select2-container {
+    width: 100% !important;
+}
+
+@media (max-width: 768px) {
+    .form-row .form-group {
+        flex: 0 0 100%;
+        max-width: 100%;
+    }
+}

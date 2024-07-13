@@ -1,0 +1,133 @@
+<div class="container p-4">
+    <div class="row justify-content-center">
+        <div class="col-md-6 col-sm-12">
+            <div class="card">
+                <div class="card-header">
+                    <h3>Editar Empleado</h3>
+                </div>
+                <div class="card-body">
+                    <form id="edit-employee-form" action="/empleados/edit/{{empleado.id}}" method="POST">
+                        <div class="form-group">
+                            <label for="idempresa">Empresa</label>
+                            <select name="idempresa" class="form-control" id="idempresa" required>
+                                <option value="" disabled selected>Selecciona una empresa</option>
+                                {{#each empresas}}
+                                <option value="{{this.id}}" {{#ifEquals this.id ../empleado.idempresa}}selected{{/ifEquals}}>{{this.nombre}}</option>
+                                {{/each}}
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="idsede">Sede</label>
+                            <select name="idsede" class="form-control" id="idsede" required>
+                                <option value="" disabled selected>Selecciona una sede</option>
+                                {{#each sedes}}
+                                <option value="{{this.code}}" {{#ifEquals this.code ../empleado.idsede}}selected{{/ifEquals}}>{{this.name}}</option>
+                                {{/each}}
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="cedula">Cédula</label>
+                            <input type="number" name="cedula" id="cedula" value="{{empleado.cedula}}" placeholder="Cédula" class="form-control" pattern="\d{10}" title="La cédula debe tener exactamente 10 dígitos" autofocus required>
+                        </div>
+                        <div class="form-group">
+                            <label for="name">Nombre</label>
+                            <input type="text" name="name" id="name" value="{{empleado.name}}" placeholder="Nombre" class="form-control" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="surname">Apellido</label>
+                            <input type="text" name="surname" id="surname" value="{{empleado.surname}}" placeholder="Apellido" class="form-control" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="email">Correo Electrónico</label>
+                            <input type="email" name="email" id="email" value="{{empleado.email}}" placeholder="Correo Electrónico" class="form-control" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="phone">Teléfono</label>
+                            <input type="number" name="phone" id="phone" value="{{empleado.phone}}" placeholder="Teléfono" class="form-control" pattern="\d{7,10}" title="El teléfono debe tener entre 7 y 10 dígitos" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="address">Dirección</label>
+                            <input type="text" name="address" id="address" value="{{empleado.address}}" placeholder="Dirección" class="form-control" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="idrol">Rol</label>
+                            <select id="idrol" name="idrol" class="form-control" required>
+                                {{#each roles}}
+                                <option value="{{this.id}}" {{#ifEquals this.id ../empleado.idrol}}selected{{/ifEquals}}>{{this.rol}}</option>
+                                {{/each}}
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="user">Usuario</label>
+                            <input type="text" name="user" id="user" value="{{empleado.user}}" placeholder="Usuario" class="form-control" required>
+                        </div>
+                        <div class="form-group">
+                            <button class="btn btn-success btn-block">Guardar</button>
+                            <button type="button" class="btn btn-secondary btn-block" onclick="window.location.href='/empleados'">Cancelar</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script>
+    document.getElementById('edit-employee-form').addEventListener('submit', function (event) {
+        const phoneInput = document.querySelector('input[name="phone"]');
+        const cedulaInput = document.querySelector('input[name="cedula"]');
+
+        const phone = phoneInput.value;
+        const cedula = cedulaInput.value;
+
+        const phonePattern = /^\d{7,10}$/;
+        const cedulaPattern = /^\d{10}$/;
+
+        if (!phonePattern.test(phone)) {
+            alert('El teléfono debe tener entre 7 y 10 dígitos.');
+            event.preventDefault();
+        }
+
+        if (!cedulaPattern.test(cedula)) {
+            alert('La cédula debe tener exactamente 10 dígitos.');
+            event.preventDefault();
+        }
+    });
+
+    document.getElementById('idempresa').addEventListener('change', function () {
+        const idempresa = this.value;
+        const idsedeSelect = document.getElementById('idsede');
+        idsedeSelect.innerHTML = '<option value="" disabled selected>Selecciona una sede</option>'; // Clear options
+
+        if (idempresa) {
+            fetch('/signup/empleado/sedes', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ idempresa })
+            })
+            .then(response => response.json())
+            .then(data => {
+                data.forEach(sede => {
+                    const option = document.createElement('option');
+                    option.value = sede.code;
+                    option.textContent = sede.name;
+                    idsedeSelect.appendChild(option);
+                });
+                // Seleccionar la sede del empleado actual si existe
+                const currentSede = "{{empleado.idsede}}";
+                if (currentSede) {
+                    idsedeSelect.value = currentSede;
+                }
+            })
+            .catch(error => console.error('Error fetching sedes:', error));
+        }
+    });
+
+    // Trigger change event to load sedes for the current empresa on page load
+    $(document).ready(function() {
+        $('#idempresa').trigger('change');
+    });
+</script>
